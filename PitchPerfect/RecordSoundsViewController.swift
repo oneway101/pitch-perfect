@@ -21,7 +21,7 @@ class RecordSoundsViewController: UIViewController , AVAudioRecorderDelegate {
         super.viewDidLoad()
         print("viewDidLoad Called")
         // Q: Should recordButton be enabled in the beginning?
-        //recordButton.enabled = true
+        //recordButton.enabled = true <-- enabled by default.
         stopRecordingButton.enabled = false
     }
 
@@ -33,12 +33,16 @@ class RecordSoundsViewController: UIViewController , AVAudioRecorderDelegate {
         print("viewWillAppear called")
 
     }
+    
+    func configureRecordingButtons(isRecording: Bool) {
+        recordingLabel.text = isRecording ? "Recording in progress..." : "Tap to record"
+        recordButton.enabled = isRecording ? false: true
+        stopRecordingButton.enabled = isRecording ? true: false
+    }
 
     @IBAction func recordAudio(sender: AnyObject) {
         print("record button pressed")
-        recordButton.enabled = false
-        stopRecordingButton.enabled = true
-        recordingLabel.text = "Recording in progress"
+        configureRecordingButtons(true)
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory,.UserDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
@@ -57,9 +61,7 @@ class RecordSoundsViewController: UIViewController , AVAudioRecorderDelegate {
 
     @IBAction func stopRecording(sender: AnyObject) {
         print("stop recording button pressed")
-        recordButton.enabled = true
-        stopRecordingButton.enabled = false
-        recordingLabel.text = "Tap to Record"
+        configureRecordingButtons(false)
         audioRecorder.stop()
         let audioSession = AVAudioSession.sharedInstance()
         try! audioSession.setActive(false)
@@ -67,7 +69,7 @@ class RecordSoundsViewController: UIViewController , AVAudioRecorderDelegate {
 
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder, successfully flag: Bool) {
         print("AVAudioRecorder finished saving recording")
-        // Check if saving the recoderding was successful or not.
+        // Check if saving the recording was successful or not.
         if (flag) {
             //Q: Call the stopRecording segue and send its url to where the recording file is located?.
             self.performSegueWithIdentifier("stopRecording", sender: audioRecorder.url)
